@@ -30,6 +30,7 @@ export const ReservationPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Read URL params with exact requested defaults
+  const shopId = searchParams.get('shopId') || 'shop-1';
   const shopName = searchParams.get('shopName') || 'Sri Lakshmi Auto Spares';
   const vehicle = searchParams.get('vehicle') || 'Tata Ace 2019';
   const partName = searchParams.get('partName') || 'Clutch Release Bearing';
@@ -38,7 +39,11 @@ export const ReservationPage: React.FC = () => {
   const availableUnits = Number(searchParams.get('stock')) || 2;
   const shopAddress = searchParams.get('address') || '14/B, 5 Roads Main Junction, Salem';
   const shopPhone = searchParams.get('phone') || '+91 98427 11223';
+  const distanceParam = searchParams.get('distance');
   const discoverySource = searchParams.get('discoverySource') || 'partfinder_verified';
+
+  const deliveryDistanceKm = distanceParam ? parseFloat(distanceParam) : 2.4;
+  const deliveryEtaMins = Math.max(15, Math.round(deliveryDistanceKm * 4) + 10);
 
   const { user } = useAuth();
   const isGooglePlace = discoverySource === 'google_places';
@@ -111,6 +116,7 @@ export const ReservationPage: React.FC = () => {
 
     const newOrder: ReservationOrder = {
       id: generatedId,
+      shopId,
       shopName,
       vehicle,
       partName,
@@ -121,8 +127,8 @@ export const ReservationPage: React.FC = () => {
       totalPrice,
       fulfillmentType,
       deliveryAddress: fulfillmentType === 'delivery' ? workshopLocation : undefined,
-      deliveryDistanceKm: 2.4,
-      deliveryEtaMins: 25,
+      deliveryDistanceKm,
+      deliveryEtaMins,
       mechanicName: mechanicName.trim(),
       mechanicPhone: mechanicPhone.trim(),
       workshopName: workshopName.trim(),
@@ -138,6 +144,7 @@ export const ReservationPage: React.FC = () => {
         phone: '+91 98421 88990',
         vehicleModel: 'Bajaj Pulsar 150 (TN-54-AB-2940)',
         rating: 4.9,
+        currentLocationDesc: `Dispatched near ${shopAddress.split(',')[0] || shopName} • ${deliveryDistanceKm} km to workshop`,
       },
     };
 
@@ -399,7 +406,7 @@ export const ReservationPage: React.FC = () => {
 
                     <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-blue-400 flex items-center gap-1.5 font-semibold">
                       <Truck className="w-3.5 h-3.5" />
-                      <span>Estimated Doorstep ETA: ~25 mins</span>
+                      <span>Estimated Doorstep ETA: ~{deliveryEtaMins} mins</span>
                     </div>
                   </div>
 

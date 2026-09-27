@@ -172,6 +172,8 @@ export interface ShopInventoryItem {
 
 export interface ShopReservationRequest {
   id: string;
+  shopId?: string;
+  shopName?: string;
   mechanicName: string;
   workshopName: string;
   vehicle: string;

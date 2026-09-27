@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdminSidebar } from '../components/admin/AdminSidebar';
+import { ReservationOrder } from '../types';
 import { 
   Menu, 
   Users, 
@@ -17,21 +18,44 @@ import {
 export const AdminDashboardPage: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [reservations, setReservations] = useState<any[]>([
+    { id: 'PF-8842', mechanic: 'Ramesh Kumar (Apex Auto)', shop: 'Sri Lakshmi Auto Spares', part: 'Clutch Release Bearing', vehicle: 'Tata Ace 2019', amount: '₹900', status: 'Confirmed', time: '12 min ago' },
+    { id: 'PF-7910', mechanic: 'Murugan P. (Sri Murugan Motors)', shop: 'Kumar Automobiles', part: 'Brake Pad Set', vehicle: 'Tata Ace', amount: '₹1,200', status: 'Ready Pickup', time: '45 min ago' },
+    { id: 'PF-6420', mechanic: 'Suresh V. (Modern Garage)', shop: 'ABC Auto Spares', part: 'Fuel Filter', vehicle: 'Mahindra Bolero', amount: '₹1,090', status: 'Delivered', time: '2 hours ago' },
+    { id: 'PF-5512', mechanic: 'Karthik S. (Salem Diesels)', shop: 'Salem Motor Spares', part: 'Alternator Belt', vehicle: 'Tata 407', amount: '₹450', status: 'Delivered', time: '3 hours ago' },
+  ]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('partfinder_reservations');
+    if (saved) {
+      try {
+        const parsed: ReservationOrder[] = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const mapped = parsed.map(o => ({
+            id: o.id,
+            mechanic: `${o.mechanicName} (${o.workshopName})`,
+            shop: o.shopName,
+            part: o.partName,
+            vehicle: o.vehicle,
+            amount: `₹${o.totalPrice}`,
+            status: o.status === 'shop_confirmed' ? 'Confirmed' : o.status === 'ready_for_pickup' ? 'Ready Pickup' : o.status === 'delivered' ? 'Delivered' : o.status === 'request_sent' ? 'Pending' : o.status,
+            time: o.createdAt || 'Just now',
+          }));
+          setReservations(mapped);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
 
   const stats = [
     { label: 'Total Mechanics', value: '142', subtext: '+12 this week', icon: Users, color: 'text-brand-400', glow: 'bg-brand-500/10' },
     { label: 'Connected Shops', value: '28', subtext: '4 pending verify', icon: Store, color: 'text-emerald-400', glow: 'bg-emerald-500/10' },
     { label: 'Catalog Parts', value: '1,840', subtext: '92% in stock', icon: Boxes, color: 'text-purple-400', glow: 'bg-purple-500/10' },
-    { label: 'Active Reservations', value: '14', subtext: '30m holds live', icon: BookmarkCheck, color: 'text-amber-400', glow: 'bg-amber-500/10' },
+    { label: 'Active Reservations', value: `${reservations.length}`, subtext: '30m holds live', icon: BookmarkCheck, color: 'text-amber-400', glow: 'bg-amber-500/10' },
     { label: 'Active Deliveries', value: '6', subtext: 'Couriers en route', icon: Truck, color: 'text-blue-400', glow: 'bg-blue-500/10' },
     { label: 'Completed Orders', value: '482', subtext: '₹4.8L gross GMV', icon: CheckCircle2, color: 'text-teal-400', glow: 'bg-teal-500/10' },
-  ];
-
-  const recentReservations = [
-    { id: 'PF-8842', mechanic: 'Ramesh Kumar (Apex Auto)', shop: 'Sri Lakshmi Auto Spares', part: 'Clutch Release Bearing', vehicle: 'Tata Ace 2019', amount: '₹900', status: 'Confirmed', time: '12 min ago' },
-    { id: 'PF-7910', mechanic: 'Murugan P. (Sri Murugan Motors)', shop: 'Kumar Automobiles', part: 'Brake Pad Set', vehicle: 'Tata Ace', amount: '₹1,200', status: 'Ready Pickup', time: '45 min ago' },
-    { id: 'PF-6420', mechanic: 'Suresh V. (Modern Garage)', shop: 'ABC Auto Spares', part: 'Fuel Filter', vehicle: 'Mahindra Bolero', amount: '₹1,090', status: 'Delivered', time: '2 hours ago' },
-    { id: 'PF-5512', mechanic: 'Karthik S. (Salem Diesels)', shop: 'Salem Motor Spares', part: 'Alternator Belt', vehicle: 'Tata 407', amount: '₹450', status: 'Delivered', time: '3 hours ago' },
   ];
 
   const connectedShops = [
@@ -181,7 +205,7 @@ export const AdminDashboardPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
-                    {recentReservations.map((r) => (
+                    {reservations.map((r) => (
                       <tr key={r.id} className="hover:bg-navy-850/60 transition-colors">
                         <td className="py-3 px-3">
                           <div className="font-bold text-white">{r.part}</div>

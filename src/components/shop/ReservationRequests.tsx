@@ -7,7 +7,8 @@ import {
   Clock, 
   Check, 
   X, 
-  Building2
+  Building2,
+  Store
 } from 'lucide-react';
 import { Button } from '../common/Button';
 import { ShopReservationRequest } from '../../types';
@@ -61,6 +62,12 @@ export const ReservationRequests: React.FC<ReservationRequestsProps> = ({
                   <span className="text-xs font-black uppercase text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded">
                     NEW RESERVATION
                   </span>
+                  {req.shopName && (
+                    <span className="text-xs font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                      <Store className="w-3 h-3" />
+                      {req.shopName}
+                    </span>
+                  )}
                   <span className="text-xs text-slate-400 font-mono">
                     #{req.id}
                   </span>

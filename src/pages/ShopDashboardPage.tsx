@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { ShopSidebar } from '../components/shop/ShopSidebar';
 import { ShopHeader } from '../components/shop/ShopHeader';
 import { DashboardMetrics } from '../components/shop/DashboardMetrics';
@@ -9,8 +10,10 @@ import { AddEditPartModal } from '../components/shop/AddEditPartModal';
 import { ShopInventoryItem, ShopReservationRequest, ReservationOrder } from '../types';
 
 export const ShopDashboardPage: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [selectedShop, setSelectedShop] = useState<string>(user?.shopName || 'Sri Lakshmi Auto Spares');
 
   // Exact required demo inventory data
   const initialInventory: ShopInventoryItem[] = [
@@ -79,6 +82,8 @@ export const ShopDashboardPage: React.FC = () => {
         if (Array.isArray(parsed) && parsed.length > 0) {
           const mapped: ShopReservationRequest[] = parsed.map(o => ({
             id: o.id,
+            shopId: o.shopId,
+            shopName: o.shopName,
             mechanicName: o.mechanicName || 'Ramesh Kumar',
             workshopName: o.workshopName || 'Apex Auto Garage',
             vehicle: o.vehicle,
@@ -106,6 +111,7 @@ export const ShopDashboardPage: React.FC = () => {
     const defaultReq: ShopReservationRequest[] = [
       {
         id: 'REQ-9421',
+        shopName: 'Sri Lakshmi Auto Spares',
         mechanicName: 'Ramesh Kumar',
         workshopName: 'Apex Auto Garage (5 Roads, Salem)',
         vehicle: '2019 Tata Ace',
@@ -216,6 +222,19 @@ export const ShopDashboardPage: React.FC = () => {
         console.error(e);
       }
     }
+
+    // Update active order if matching
+    const activeStr = localStorage.getItem('partfinder_active_order');
+    if (activeStr) {
+      try {
+        const activeOrder: ReservationOrder = JSON.parse(activeStr);
+        if (activeOrder && activeOrder.id === id) {
+          localStorage.setItem('partfinder_active_order', JSON.stringify({ ...activeOrder, status: 'shop_confirmed' }));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
   // Handle Reject Reservation Request
@@ -246,6 +265,19 @@ export const ShopDashboardPage: React.FC = () => {
         console.error(e);
       }
     }
+
+    // Update active order if matching
+    const activeStr = localStorage.getItem('partfinder_active_order');
+    if (activeStr) {
+      try {
+        const activeOrder: ReservationOrder = JSON.parse(activeStr);
+        if (activeOrder && activeOrder.id === id) {
+          localStorage.setItem('partfinder_active_order', JSON.stringify({ ...activeOrder, status: 'rejected' }));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
   return (
@@ -265,7 +297,7 @@ export const ShopDashboardPage: React.FC = () => {
         {/* 2. HEADER */}
         <ShopHeader
           onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
-          shopName="Sri Lakshmi Auto Spares"
+          shopName={selectedShop}
           location="Salem"
           isVerified={true}
         />
@@ -273,6 +305,27 @@ export const ShopDashboardPage: React.FC = () => {
         {/* 3. DASHBOARD BODY */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
           
+          {/* Shop Selector Strip */}
+          <div className="bg-navy-900/90 rounded-2xl p-4 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 font-semibold">Active Shop Profile:</span>
+              <strong className="text-white font-bold">{selectedShop}</strong>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400">Switch Counter:</span>
+              <select
+                value={selectedShop}
+                onChange={(e) => setSelectedShop(e.target.value)}
+                className="bg-navy-950 text-white font-bold px-3 py-1.5 rounded-xl border border-slate-700 focus:outline-none focus:border-brand-500 cursor-pointer text-xs"
+              >
+                <option value="Sri Lakshmi Auto Spares">Sri Lakshmi Auto Spares (5 Roads)</option>
+                <option value="Kumar Automobiles">Kumar Automobiles (Meyyanur)</option>
+                <option value="ABC Auto Spares">ABC Auto Spares (Omalur Rd)</option>
+                <option value="All Shops">All Incoming Requests (Platform View)</option>
+              </select>
+            </div>
+          </div>
+
           {/* A. DASHBOARD METRICS */}
           <DashboardMetrics
             inventory={inventory}
@@ -289,7 +342,7 @@ export const ShopDashboardPage: React.FC = () => {
           {/* C. INCOMING RESERVATION REQUESTS */}
           {(activeTab === 'dashboard' || activeTab === 'reservations') && (
             <ReservationRequests
-              requests={requests}
+              requests={selectedShop === 'All Shops' ? requests : requests.filter(r => !r.shopName || r.shopName.toLowerCase().includes(selectedShop.toLowerCase()) || selectedShop.toLowerCase().includes(r.shopName.toLowerCase()))}
               onAccept={handleAcceptRequest}
               onReject={handleRejectRequest}
             />

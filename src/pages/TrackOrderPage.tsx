@@ -30,36 +30,68 @@ export const TrackOrderPage: React.FC = () => {
 
   // Load order from localStorage or create realistic demo order
   useEffect(() => {
-    // 1. Check shared reservations list
-    const savedList = localStorage.getItem('partfinder_reservations');
-    if (savedList) {
-      try {
-        const parsedList: ReservationOrder[] = JSON.parse(savedList);
-        if (Array.isArray(parsedList) && parsedList.length > 0) {
-          const found = targetId ? parsedList.find(o => o.id.toLowerCase() === targetId.toLowerCase()) : parsedList[0];
-          if (found) {
-            setOrder(found);
-            setInputOrderId(found.id);
+    // 1. If targetId is provided, look in shared reservations first
+    if (targetId) {
+      const savedList = localStorage.getItem('partfinder_reservations');
+      if (savedList) {
+        try {
+          const parsedList: ReservationOrder[] = JSON.parse(savedList);
+          if (Array.isArray(parsedList) && parsedList.length > 0) {
+            const found = parsedList.find(o => o.id.toLowerCase() === targetId.toLowerCase());
+            if (found) {
+              setOrder(found);
+              setInputOrderId(found.id);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Check active order for matching targetId
+      const stored = localStorage.getItem('partfinder_active_order');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as ReservationOrder;
+          if (parsed && parsed.id && parsed.id.toLowerCase() === targetId.toLowerCase()) {
+            setOrder(parsed);
+            setInputOrderId(parsed.id);
             return;
           }
+        } catch (e) {
+          console.error(e);
         }
-      } catch (e) {
-        console.error(e);
       }
-    }
-
-    // 2. Check active order
-    const stored = localStorage.getItem('partfinder_active_order');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as ReservationOrder;
-        if (!targetId || targetId === parsed.id) {
-          setOrder(parsed);
-          setInputOrderId(parsed.id);
-          return;
+    } else {
+      // No targetId provided: check active order first (most recently placed reservation)
+      const stored = localStorage.getItem('partfinder_active_order');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as ReservationOrder;
+          if (parsed && parsed.id) {
+            setOrder(parsed);
+            setInputOrderId(parsed.id);
+            return;
+          }
+        } catch (e) {
+          console.error(e);
         }
-      } catch (e) {
-        console.error(e);
+      }
+
+      // Check first reservation in shared list
+      const savedList = localStorage.getItem('partfinder_reservations');
+      if (savedList) {
+        try {
+          const parsedList: ReservationOrder[] = JSON.parse(savedList);
+          if (Array.isArray(parsedList) && parsedList.length > 0) {
+            setOrder(parsedList[0]);
+            setInputOrderId(parsedList[0].id);
+            return;
+          }
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
 
@@ -165,6 +197,9 @@ export const TrackOrderPage: React.FC = () => {
   };
 
   const currentStageIdx = getStageIndex(order.status);
+  const locationHubName = order.workshopLocation 
+    ? (order.workshopLocation.includes(',') ? order.workshopLocation.split(',').pop()?.trim() : order.workshopLocation)
+    : 'Salem';
 
   return (
     <div className="pt-28 pb-24 min-h-screen bg-navy-950 text-slate-100">
@@ -318,7 +353,7 @@ export const TrackOrderPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Navigation className="w-4 h-4 text-brand-400" />
                 <h3 className="text-sm font-bold text-white tracking-tight">
-                  Simulated Transit Route (Salem Hub)
+                  Simulated Transit Route ({locationHubName} Area)
                 </h3>
               </div>
               <span className="text-[10px] font-semibold text-slate-400 bg-navy-950 px-2 py-0.5 rounded border border-slate-800">
@@ -347,7 +382,7 @@ export const TrackOrderPage: React.FC = () => {
               <div className="ml-4 pl-4 border-l-2 border-dashed border-brand-500/50 py-2 space-y-1.5">
                 <div className="flex items-center gap-2 text-xs text-brand-300 font-semibold">
                   <Truck className="w-4 h-4 text-brand-400 animate-bounce" />
-                  <span>Murugan K. • En Route (Estimated 2.4 km)</span>
+                  <span>{order.driver?.name || 'Murugan K.'} • En Route (Estimated {order.deliveryDistanceKm || 2.4} km)</span>
                 </div>
                 <div className="text-[11px] text-slate-400">
                   {order.driver?.currentLocationDesc || 'Transit via Omalur Road • Avg speed 32 km/h'}
