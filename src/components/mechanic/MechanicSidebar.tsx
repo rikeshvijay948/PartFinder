@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -10,9 +10,14 @@ import {
   Clock, 
   LogOut, 
   Wrench, 
-  X,
-  Store
+  X, 
+  Store,
+  Sparkles,
+  Camera,
+  Send
 } from 'lucide-react';
+import { AIPartIdentifierModal } from './AIPartIdentifierModal';
+import { InstantPartRequestModal } from './InstantPartRequestModal';
 
 interface MechanicSidebarProps {
   isOpenMobile: boolean;
@@ -26,6 +31,8 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isAiIdentifierOpen, setIsAiIdentifierOpen] = useState(false);
+  const [isInstantRequestOpen, setIsInstantRequestOpen] = useState(false);
 
   const navItems = [
     { path: '/mechanic/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -147,6 +154,43 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
               );
             })}
           </nav>
+
+          {/* Quick AI & Instant Tools */}
+          <div className="px-3 mt-4 pt-3 border-t border-slate-800/80 space-y-1.5">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 mb-1">
+              Rapid Garage Tools
+            </div>
+
+            <button
+              onClick={() => {
+                setIsAiIdentifierOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-brand-300 hover:text-white bg-brand-600/10 hover:bg-brand-600/20 border border-brand-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <Camera className="w-3.5 h-3.5 text-brand-400 group-hover:scale-110 transition-transform" />
+                <span>AI Part Identifier</span>
+              </div>
+              <Sparkles className="w-3 h-3 text-brand-400" />
+            </button>
+
+            <button
+              onClick={() => {
+                setIsInstantRequestOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-emerald-300 hover:text-white bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <Send className="w-3.5 h-3.5 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+                <span>Instant Part Request</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold uppercase">
+                Fast
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Bottom Actions */}
@@ -168,6 +212,18 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
           </button>
         </div>
       </aside>
+
+      {/* AI Part Identifier Modal */}
+      <AIPartIdentifierModal
+        isOpen={isAiIdentifierOpen}
+        onClose={() => setIsAiIdentifierOpen(false)}
+      />
+
+      {/* Instant Part Request Modal */}
+      <InstantPartRequestModal
+        isOpen={isInstantRequestOpen}
+        onClose={() => setIsInstantRequestOpen(false)}
+      />
     </>
   );
 };

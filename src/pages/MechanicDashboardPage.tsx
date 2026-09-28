@@ -16,15 +16,22 @@ import {
   Bell, 
   Car, 
   ShieldCheck,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  Camera,
+  Send
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
+import { AIPartIdentifierModal } from '../components/mechanic/AIPartIdentifierModal';
+import { InstantPartRequestModal } from '../components/mechanic/InstantPartRequestModal';
 
 export const MechanicDashboardPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [orders, setOrders] = useState<ReservationOrder[]>([]);
+  const [isAiIdentifierOpen, setIsAiIdentifierOpen] = useState(false);
+  const [isInstantRequestOpen, setIsInstantRequestOpen] = useState(false);
 
   // Pre-seeded demo orders fallback
   const defaultOrders: ReservationOrder[] = [
@@ -267,6 +274,106 @@ export const MechanicDashboardPage: React.FC = () => {
             </div>
           </div>
 
+          {/* ================= NEW WORKSHOP TOOLS: AI IDENTIFIER & INSTANT REQUEST ================= */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* Feature 1: AI Part Identifier Card */}
+            <div className="bg-gradient-to-br from-navy-900 via-navy-850 to-navy-900 rounded-3xl p-6 border border-brand-500/30 shadow-2xl relative overflow-hidden group hover:border-brand-500/60 transition-all">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-brand-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-brand-500/20 transition-all" />
+              
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 p-0.5 shadow-lg shadow-brand-600/30">
+                    <div className="w-full h-full bg-navy-950 rounded-[14px] flex items-center justify-center">
+                      <Camera className="w-6 h-6 text-brand-400 group-hover:scale-110 transition-transform" />
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-500/15 text-brand-300 border border-brand-500/30 text-[10px] font-bold uppercase tracking-wider">
+                    <Sparkles className="w-3 h-3 text-brand-400" />
+                    <span>AI Vision Powered</span>
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg sm:text-xl font-black text-white tracking-tight flex items-center gap-2">
+                    <span>AI Part Identifier</span>
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Upload a photo to identify a possible spare part.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-navy-950/80 border border-slate-800 text-[11px] text-slate-300 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">Sample Recognition:</span>
+                    <span className="font-bold text-emerald-400">87% Confidence</span>
+                  </div>
+                  <div className="font-semibold text-white truncate">
+                    Clutch Release Bearing • Tata Ace 2019
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full text-xs font-bold shadow-lg shadow-brand-600/20 flex items-center justify-center gap-2 py-3"
+                  icon={<Camera className="w-4 h-4" />}
+                  onClick={() => setIsAiIdentifierOpen(true)}
+                >
+                  <span>Upload & Identify Part</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Feature 2: Instant Part Request Card */}
+            <div className="bg-gradient-to-br from-navy-900 via-navy-850 to-navy-900 rounded-3xl p-6 border border-emerald-500/30 shadow-2xl relative overflow-hidden group hover:border-emerald-500/60 transition-all">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
+              
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 p-0.5 shadow-lg shadow-emerald-600/30">
+                    <div className="w-full h-full bg-navy-950 rounded-[14px] flex items-center justify-center">
+                      <Send className="w-6 h-6 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
+                    <span>Direct Shop Ping</span>
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    Instant Part Request
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Request a part directly from nearby local shops for rapid quotes and 30-min holds.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-navy-950/80 border border-slate-800 text-[11px] text-slate-300 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">Instant Broadcast:</span>
+                    <span className="font-bold text-brand-300">Pickup or Bay Delivery</span>
+                  </div>
+                  <div className="font-semibold text-white truncate">
+                    Tata Ace 2019 • Clutch Bearing • Current Location
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full text-xs font-bold shadow-lg shadow-emerald-600/20 bg-emerald-600 hover:bg-emerald-500 border-emerald-500 flex items-center justify-center gap-2 py-3"
+                  icon={<Send className="w-4 h-4" />}
+                  onClick={() => setIsInstantRequestOpen(true)}
+                >
+                  <span>Request From Nearby Shops</span>
+                </Button>
+              </div>
+            </div>
+
+          </div>
+
           {/* 4 Statistics Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             
@@ -487,6 +594,18 @@ export const MechanicDashboardPage: React.FC = () => {
 
         </main>
       </div>
+
+      {/* AI Part Identifier Modal */}
+      <AIPartIdentifierModal
+        isOpen={isAiIdentifierOpen}
+        onClose={() => setIsAiIdentifierOpen(false)}
+      />
+
+      {/* Instant Part Request Modal */}
+      <InstantPartRequestModal
+        isOpen={isInstantRequestOpen}
+        onClose={() => setIsInstantRequestOpen(false)}
+      />
     </div>
   );
 };

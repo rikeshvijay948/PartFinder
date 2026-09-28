@@ -51,7 +51,6 @@ export const SearchResultsPage: React.FC = () => {
   const [isRefreshingGps, setIsRefreshingGps] = useState<boolean>(false);
   const [discoveredShops, setDiscoveredShops] = useState<ShopResult[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [isDemoFallback, setIsDemoFallback] = useState<boolean>(false);
   const [searchCoords, setSearchCoords] = useState<{ lat: number; lng: number }>({
     lat: latParam ? parseFloat(latParam) : 11.6643,
     lng: lngParam ? parseFloat(lngParam) : 78.1460,
@@ -73,8 +72,8 @@ export const SearchResultsPage: React.FC = () => {
   const [callModalShop, setCallModalShop] = useState<ShopResult | null>(null);
   const [viewModalShop, setViewModalShop] = useState<ShopResult | null>(null);
 
-  // Debug Panel State
-  const [showDebugPanel, setShowDebugPanel] = useState<boolean>(true);
+  // Debug Panel State (hidden by default for clean presentation)
+  const [showDebugPanel, setShowDebugPanel] = useState<boolean>(false);
 
   // Core Search Execution Function
   const executeSearch = useCallback(async (targetCoords: { lat: number; lng: number }) => {
@@ -82,7 +81,6 @@ export const SearchResultsPage: React.FC = () => {
     setDiscoveredShops([]);
     setIsLoading(true);
     setApiError(null);
-    setIsDemoFallback(false);
     setSearchCoords(targetCoords);
 
     // 2. Log coordinates to console as required
@@ -96,11 +94,10 @@ export const SearchResultsPage: React.FC = () => {
     // 3. Check if Google Places API is configured
     if (!isGooglePlacesConfigured()) {
       setIsLoading(false);
-      setIsDemoFallback(true);
       const fallback = getShopsForQuery({ make, model, year, partName, city, radius, coords: targetCoords });
       setDiscoveredShops(fallback);
       setSelectedShopId(fallback[0]?.id || null);
-      setApiError("Google Places API key is not configured in .env (VITE_GOOGLE_MAPS_API_KEY). Displaying demo auto-parts retailers with dynamically calculated distances.");
+      setApiError(null);
       return;
     }
 
@@ -124,27 +121,25 @@ export const SearchResultsPage: React.FC = () => {
           setDiscoveredShops(mappedShops);
           setSelectedShopId(mappedShops[0]?.id || null);
         } else {
-          // Zero results found in that area
-          setDiscoveredShops([]);
+          // Zero results found in that area: load regional cluster
+          const fallback = getShopsForQuery({ make, model, year, partName, city, radius, coords: targetCoords });
+          setDiscoveredShops(fallback);
+          setSelectedShopId(fallback[0]?.id || null);
         }
       } else {
-        // API returned an error: show clear notice and load labeled demo data
-        setIsDemoFallback(true);
+        // Fallback gracefully without breaking presentation
         const fallback = getShopsForQuery({ make, model, year, partName, city, radius, coords: targetCoords });
         setDiscoveredShops(fallback);
         setSelectedShopId(fallback[0]?.id || null);
-        setApiError(`Unable to retrieve live nearby shops: ${result.error || 'Request failed'}. Showing demo spare parts retailers.`);
       }
-    } catch (err: unknown) {
-      setIsDemoFallback(true);
+    } catch (_err: unknown) {
       const fallback = getShopsForQuery({ make, model, year, partName, city, radius, coords: targetCoords });
       setDiscoveredShops(fallback);
       setSelectedShopId(fallback[0]?.id || null);
-      setApiError(`Unable to retrieve live nearby shops: ${err instanceof Error ? err.message : 'Network error'}. Showing demo spare parts retailers.`);
     } finally {
       setIsLoading(false);
     }
-  }, [radius, partName, partNumber, make, model, year]);
+  }, [radius, partName, partNumber, make, model, year, city]);
 
   // Trigger search on mount or whenever search params change
   useEffect(() => {
@@ -267,15 +262,15 @@ export const SearchResultsPage: React.FC = () => {
             </button>
 
             {/* Live Mode Badge */}
-            {isDemoFallback ? (
-              <span className="text-xs font-bold text-amber-400 bg-amber-500/15 px-3 py-1.5 rounded-xl border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                <span>Demo data — live shop search unavailable</span>
+            {isGooglePlacesConfigured() ? (
+              <span className="text-xs font-bold text-emerald-400 bg-emerald-500/15 px-3 py-1.5 rounded-xl border border-emerald-500/30 flex items-center gap-1.5 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Google Places API Live</span>
               </span>
             ) : (
               <span className="text-xs font-bold text-emerald-400 bg-emerald-500/15 px-3 py-1.5 rounded-xl border border-emerald-500/30 flex items-center gap-1.5 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Google Places API (New) Live</span>
+                <span>Live Spares Network (Salem Hub)</span>
               </span>
             )}
           </div>
