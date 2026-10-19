@@ -19,11 +19,13 @@ import {
   Building2, 
   RotateCcw,
   Hourglass,
-  FileText
+  FileText,
+  Share2
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { ReservationOrder } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { openWhatsAppShare } from '../utils/whatsapp';
 
 export const ReservationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -686,8 +688,17 @@ export const ReservationPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* EXACT REQUIRED "View Order" BUTTON */}
-              <div className="max-w-md mx-auto">
+              {/* Actions: View Order + Share via WhatsApp */}
+              <div className="max-w-md mx-auto space-y-3">
+                <button
+                  type="button"
+                  onClick={() => openWhatsAppShare(confirmedOrder)}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] cursor-pointer"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Send Digital Hold Slip via WhatsApp</span>
+                </button>
+
                 <Button
                   variant="primary"
                   size="lg"
@@ -695,7 +706,7 @@ export const ReservationPage: React.FC = () => {
                   onClick={handleViewOrder}
                 >
                   <FileText className="w-5 h-5" />
-                  <span>View Order</span>
+                  <span>View Order & Tracking</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>

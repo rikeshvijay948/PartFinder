@@ -13,10 +13,12 @@ import {
   ShieldCheck, 
   ArrowLeft,
   PackageCheck,
-  Wrench
+  Wrench,
+  Share2
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { ReservationOrder, OrderStatus } from '../types';
+import { openWhatsAppShare } from '../utils/whatsapp';
 
 export const TrackOrderPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
@@ -279,6 +281,21 @@ export const TrackOrderPage: React.FC = () => {
               <span className="text-slate-400 block text-[11px]">Total Price</span>
               <strong className="text-white block font-mono font-bold">₹{order.totalPrice} ({order.quantity} unit)</strong>
             </div>
+          </div>
+
+          {/* Quick WhatsApp Pass Share */}
+          <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-800/80">
+            <span className="text-xs text-slate-400">
+              Need to share this hold ticket with your runner or the shopkeeper?
+            </span>
+            <button
+              type="button"
+              onClick={() => openWhatsAppShare(order)}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all hover:scale-105 cursor-pointer shadow-sm"
+            >
+              <Share2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Share Hold Slip via WhatsApp</span>
+            </button>
           </div>
         </div>
 
