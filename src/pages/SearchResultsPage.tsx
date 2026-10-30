@@ -14,13 +14,15 @@ import {
   Phone,
   Crosshair,
   Terminal,
-  RefreshCw
+  RefreshCw,
+  ArrowLeftRight
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { ShopCard } from '../components/search-results/ShopCard';
 import { VisualMapPanel } from '../components/search-results/VisualMapPanel';
 import { CallShopModal } from '../components/search-results/CallShopModal';
 import { ViewShopModal } from '../components/search-results/ViewShopModal';
+import { CompareShopsModal } from '../components/search-results/CompareShopsModal';
 import { 
   searchNearbyAutoParts, 
   resolveCityCoordinates, 
@@ -61,9 +63,10 @@ export const SearchResultsPage: React.FC = () => {
   const [phoneOnly, setPhoneOnly] = useState<boolean>(false);
   const [maxDistance, setMaxDistance] = useState<'all' | '2' | '5' | '10' | '25'>('all');
   const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
+  const [inStockOnly, setInStockOnly] = useState<boolean>(false);
 
-  // Sorting State
-  const [sortBy, setSortBy] = useState<'nearest' | 'rating' | 'name'>('nearest');
+  // Sorting State: Nearest, Lowest Price, Highest Price, Highest Stock, Rating, Shop Name
+  const [sortBy, setSortBy] = useState<'nearest' | 'price_asc' | 'price_desc' | 'stock' | 'rating' | 'name'>('nearest');
 
   // Interactive Selection State
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
@@ -71,6 +74,7 @@ export const SearchResultsPage: React.FC = () => {
   // Modal States
   const [callModalShop, setCallModalShop] = useState<ShopResult | null>(null);
   const [viewModalShop, setViewModalShop] = useState<ShopResult | null>(null);
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false);
 
   // Debug Panel State (hidden by default for clean presentation)
   const [showDebugPanel, setShowDebugPanel] = useState<boolean>(false);
@@ -205,15 +209,21 @@ export const SearchResultsPage: React.FC = () => {
         // Verified filter
         if (verifiedOnly && !shop.isVerified) return false;
 
+        // In-stock only filter
+        if (inStockOnly && (shop.stockStatus === 'out-of-stock' || shop.stockCount <= 0)) return false;
+
         return true;
       })
       .sort((a, b) => {
         if (sortBy === 'nearest') return a.distanceKm - b.distanceKm;
+        if (sortBy === 'price_asc') return a.price - b.price;
+        if (sortBy === 'price_desc') return b.price - a.price;
+        if (sortBy === 'stock') return b.stockCount - a.stockCount;
         if (sortBy === 'rating') return b.rating - a.rating;
         if (sortBy === 'name') return a.shopName.localeCompare(b.shopName);
         return 0;
       });
-  }, [discoveredShops, openNowOnly, phoneOnly, maxDistance, verifiedOnly, sortBy]);
+  }, [discoveredShops, openNowOnly, phoneOnly, maxDistance, verifiedOnly, inStockOnly, sortBy]);
 
   const handleModifySearch = () => {
     navigate(`/find-part?${searchParams.toString()}`);
@@ -260,6 +270,17 @@ export const SearchResultsPage: React.FC = () => {
               <RefreshCw className={`w-3.5 h-3.5 ${(isLoading || isRefreshingGps) ? 'animate-spin' : ''}`} />
               <span>{isRefreshingGps ? 'Refreshing GPS...' : 'Search Again'}</span>
             </button>
+
+            {/* Compare Shops Modal Button */}
+            {filteredAndSortedShops.length > 1 && (
+              <button
+                onClick={() => setIsCompareModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-navy-900 hover:bg-slate-800 text-brand-300 hover:text-white text-xs font-bold border border-brand-500/30 hover:border-brand-500 shadow-md transition-all cursor-pointer"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5 text-brand-400" />
+                <span>Compare {filteredAndSortedShops.length} Shops</span>
+              </button>
+            )}
 
             {/* Live Mode Badge */}
             {isGooglePlacesConfigured() ? (
@@ -479,6 +500,20 @@ export const SearchResultsPage: React.FC = () => {
                   Verified Partners Only
                 </span>
               </label>
+
+              {/* In-Stock Only Toggle */}
+              <label className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-navy-950 border border-slate-700 text-slate-200 cursor-pointer hover:border-slate-600 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={inStockOnly}
+                  onChange={(e) => setInStockOnly(e.target.checked)}
+                  className="rounded bg-navy-900 border-slate-700 text-emerald-500 focus:ring-0 cursor-pointer"
+                />
+                <span className="font-semibold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  In Stock Only
+                </span>
+              </label>
             </div>
 
             {/* Sort Control */}
@@ -493,6 +528,9 @@ export const SearchResultsPage: React.FC = () => {
                 className="bg-navy-950 text-white font-bold px-3.5 py-2 rounded-xl border border-slate-700 focus:outline-none focus:border-brand-500 cursor-pointer"
               >
                 <option value="nearest">Nearest First (Distance)</option>
+                <option value="price_asc">Lowest Price (₹ Low to High)</option>
+                <option value="price_desc">Highest Price (₹ High to Low)</option>
+                <option value="stock">Most In-Stock First</option>
                 <option value="rating">Highest Rated First (★)</option>
                 <option value="name">Shop Name (A-Z)</option>
               </select>
@@ -606,6 +644,17 @@ export const SearchResultsPage: React.FC = () => {
           setCallModalShop(s);
         }}
         onReserve={handleReserve}
+      />
+
+      {/* SIDE-BY-SIDE MULTI-SHOP COMPARATOR MODAL */}
+      <CompareShopsModal
+        isOpen={isCompareModalOpen}
+        onClose={() => setIsCompareModalOpen(false)}
+        shops={filteredAndSortedShops}
+        vehicle={`${make} ${model} ${year}`}
+        partName={partName}
+        onReserve={handleReserve}
+        onCall={(s) => setCallModalShop(s)}
       />
 
     </div>
