@@ -14,10 +14,13 @@ import {
   Store,
   Sparkles,
   Camera,
-  Send
+  Send,
+  Car
 } from 'lucide-react';
 import { AIPartIdentifierModal } from './AIPartIdentifierModal';
 import { InstantPartRequestModal } from './InstantPartRequestModal';
+import { NumberPlateLookupModal } from '../common/NumberPlateLookupModal';
+import { VehicleRCDetails } from '../../utils/rcLookup';
 
 interface MechanicSidebarProps {
   isOpenMobile: boolean;
@@ -33,6 +36,19 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
   const location = useLocation();
   const [isAiIdentifierOpen, setIsAiIdentifierOpen] = useState(false);
   const [isInstantRequestOpen, setIsInstantRequestOpen] = useState(false);
+  const [isPlateModalOpen, setIsPlateModalOpen] = useState(false);
+
+  const handlePlateSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
+    const params = new URLSearchParams({
+      make: rc.make,
+      model: rc.model,
+      year: rc.year,
+      plate: rc.plateNumber,
+      ...(selectedPart ? { part: selectedPart } : {})
+    });
+    navigate(`/find-part?${params.toString()}`);
+    onCloseMobile();
+  };
 
   const navItems = [
     { path: '/mechanic/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -190,6 +206,22 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
                 Fast
               </span>
             </button>
+
+            <button
+              onClick={() => {
+                setIsPlateModalOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-amber-300 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <Car className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+                <span>Plate (RC) Decoder</span>
+              </div>
+              <span className="bg-blue-700 text-white font-mono text-[8px] px-1.5 py-0.5 rounded font-bold">
+                IND
+              </span>
+            </button>
           </div>
         </div>
 
@@ -223,6 +255,13 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
       <InstantPartRequestModal
         isOpen={isInstantRequestOpen}
         onClose={() => setIsInstantRequestOpen(false)}
+      />
+
+      {/* Vehicle Registration Number Plate (RC) Lookup Modal */}
+      <NumberPlateLookupModal
+        isOpen={isPlateModalOpen}
+        onClose={() => setIsPlateModalOpen(false)}
+        onSelectVehicle={handlePlateSelect}
       />
     </>
   );

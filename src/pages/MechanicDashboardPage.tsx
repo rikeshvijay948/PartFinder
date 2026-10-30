@@ -24,6 +24,8 @@ import {
 import { Button } from '../components/common/Button';
 import { AIPartIdentifierModal } from '../components/mechanic/AIPartIdentifierModal';
 import { InstantPartRequestModal } from '../components/mechanic/InstantPartRequestModal';
+import { NumberPlateLookupModal } from '../components/common/NumberPlateLookupModal';
+import { VehicleRCDetails } from '../utils/rcLookup';
 
 export const MechanicDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -32,6 +34,18 @@ export const MechanicDashboardPage: React.FC = () => {
   const [orders, setOrders] = useState<ReservationOrder[]>([]);
   const [isAiIdentifierOpen, setIsAiIdentifierOpen] = useState(false);
   const [isInstantRequestOpen, setIsInstantRequestOpen] = useState(false);
+  const [isPlateLookupOpen, setIsPlateLookupOpen] = useState(false);
+
+  const handlePlateVehicleSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
+    const params = new URLSearchParams({
+      make: rc.make,
+      model: rc.model,
+      year: rc.year,
+      plate: rc.plateNumber,
+      ...(selectedPart ? { part: selectedPart } : {})
+    });
+    navigate(`/find-part?${params.toString()}`);
+  };
 
   // Pre-seeded demo orders fallback
   const defaultOrders: ReservationOrder[] = [
@@ -274,8 +288,8 @@ export const MechanicDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* ================= NEW WORKSHOP TOOLS: AI IDENTIFIER & INSTANT REQUEST ================= */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* ================= NEW WORKSHOP TOOLS: AI IDENTIFIER, INSTANT REQUEST & RC LOOKUP ================= */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             
             {/* Feature 1: AI Part Identifier Card */}
             <div className="bg-gradient-to-br from-navy-900 via-navy-850 to-navy-900 rounded-3xl p-6 border border-brand-500/30 shadow-2xl relative overflow-hidden group hover:border-brand-500/60 transition-all">
@@ -368,6 +382,54 @@ export const MechanicDashboardPage: React.FC = () => {
                   onClick={() => setIsInstantRequestOpen(true)}
                 >
                   <span>Request From Nearby Shops</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Feature 3: Number Plate (RC) Lookup & HSRP Decoder */}
+            <div className="bg-gradient-to-br from-navy-900 via-navy-850 to-navy-900 rounded-3xl p-6 border border-amber-500/30 shadow-2xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all" />
+              
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 p-0.5 shadow-lg shadow-amber-600/30">
+                    <div className="w-full h-full bg-navy-950 rounded-[14px] flex items-center justify-center">
+                      <Car className="w-6 h-6 text-amber-400 group-hover:scale-110 transition-transform" />
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold uppercase tracking-wider">
+                    <span className="bg-blue-700 text-white font-mono text-[8px] px-1 py-0.2 rounded-[2px] font-bold">IND</span>
+                    <span>Parivahan Smart RC</span>
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    Number Plate (RC) Lookup
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Decode any Indian registration plate to auto-fetch vehicle specs & compatible spares.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-navy-950/80 border border-slate-800 text-[11px] text-slate-300 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">Plate Decoder:</span>
+                    <span className="font-bold text-amber-400">TN 54 AB 2940</span>
+                  </div>
+                  <div className="font-semibold text-white truncate">
+                    Tata Ace 2019 (Diesel) • Salem West RTO
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full text-xs font-bold shadow-lg shadow-amber-600/20 bg-amber-500 hover:bg-amber-400 border-amber-500 text-slate-950 font-black flex items-center justify-center gap-2 py-3"
+                  icon={<Search className="w-4 h-4 text-slate-950" />}
+                  onClick={() => setIsPlateLookupOpen(true)}
+                >
+                  <span>Decode Registration Plate</span>
                 </Button>
               </div>
             </div>
@@ -605,6 +667,13 @@ export const MechanicDashboardPage: React.FC = () => {
       <InstantPartRequestModal
         isOpen={isInstantRequestOpen}
         onClose={() => setIsInstantRequestOpen(false)}
+      />
+
+      {/* Vehicle Registration Number Plate (RC) Lookup Modal */}
+      <NumberPlateLookupModal
+        isOpen={isPlateLookupOpen}
+        onClose={() => setIsPlateLookupOpen(false)}
+        onSelectVehicle={handlePlateVehicleSelect}
       />
     </div>
   );

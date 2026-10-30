@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { VoiceSearchModal } from '../components/common/VoiceSearchModal';
+import { NumberPlateLookupModal } from '../components/common/NumberPlateLookupModal';
+import { VehicleRCDetails } from '../utils/rcLookup';
 import { 
   POPULAR_MAKES, 
   MODELS_BY_MAKE, 
@@ -38,7 +40,7 @@ export const FindPartPage: React.FC = () => {
   const [make, setMake] = useState(searchParams.get('make') || 'Tata');
   const [model, setModel] = useState(searchParams.get('model') || 'Ace');
   const [year, setYear] = useState(searchParams.get('year') || '2019');
-  const [partName, setPartName] = useState(searchParams.get('part') || 'Clutch Release Bearing');
+  const [partName, setPartName] = useState(searchParams.get('part') || searchParams.get('query') || 'Clutch Release Bearing');
   const [partNumber, setPartNumber] = useState(searchParams.get('partNumber') || '');
   const [city, setCity] = useState(searchParams.get('city') || 'Salem');
   const [radius, setRadius] = useState(searchParams.get('radius') || '10');
@@ -60,6 +62,24 @@ export const FindPartPage: React.FC = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [isPlateModalOpen, setIsPlateModalOpen] = useState(false);
+  const [activePlateNumber, setActivePlateNumber] = useState<string | null>(searchParams.get('plate') || null);
+
+  // Handle Number Plate RC Selection
+  const handlePlateVehicleSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
+    setMake(rc.make);
+    setModel(rc.model);
+    setYear(rc.year);
+    setActivePlateNumber(rc.plateNumber);
+    if (selectedPart) {
+      setPartName(selectedPart);
+    }
+    if (rc.city && locationMode === 'manual') {
+      setCity(rc.city);
+    }
+    if (errors.model) setErrors(prev => ({ ...prev, model: undefined }));
+    if (errors.partName && selectedPart) setErrors(prev => ({ ...prev, partName: undefined }));
+  };
 
   // Handle Voice Search Recognition Result
   const handleVoiceResult = (parsed: { make?: string; model?: string; partName: string; year?: string }) => {
@@ -325,6 +345,14 @@ export const FindPartPage: React.FC = () => {
           >
             Mahindra Bolero (2021) • Brake Pads • Coimbatore (15 km)
           </button>
+          <button
+            type="button"
+            onClick={() => setIsPlateModalOpen(true)}
+            className="text-xs px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:border-amber-400 transition-all font-semibold flex items-center gap-1.5 cursor-pointer"
+          >
+            <span className="bg-blue-700 text-white font-mono text-[9px] px-1 py-0.2 rounded-[2px] font-bold">IND</span>
+            <span>Lookup by Number Plate</span>
+          </button>
         </div>
 
         {/* Main Search Card */}
@@ -333,14 +361,27 @@ export const FindPartPage: React.FC = () => {
             
             {/* SECTION 1: VEHICLE DETAILS */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2.5 pb-2 border-b border-slate-800">
-                <div className="w-8 h-8 rounded-lg bg-brand-600/20 border border-brand-500/30 flex items-center justify-center text-brand-400">
-                  <Car className="w-4 h-4" />
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800 flex-wrap gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-brand-600/20 border border-brand-500/30 flex items-center justify-center text-brand-400">
+                    <Car className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white tracking-tight">1. Vehicle Specification</h3>
+                    <p className="text-xs text-slate-400">Select make, model and manufacturing year for exact OEM match</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">1. Vehicle Specification</h3>
-                  <p className="text-xs text-slate-400">Select make, model and manufacturing year for exact OEM match</p>
-                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsPlateModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-all hover:scale-105 cursor-pointer shadow-sm"
+                >
+                  <div className="w-4 h-3 bg-blue-700 rounded-[2px] flex items-center justify-center text-[7px] text-white font-mono font-bold">
+                    IND
+                  </div>
+                  <span>{activePlateNumber ? `RC: ${activePlateNumber}` : 'Decode via Number Plate (RC)'}</span>
+                </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -722,6 +763,13 @@ export const FindPartPage: React.FC = () => {
         isOpen={isVoiceModalOpen}
         onClose={() => setIsVoiceModalOpen(false)}
         onResult={handleVoiceResult}
+      />
+
+      {/* Vehicle Registration Number Plate (RC) Lookup Modal */}
+      <NumberPlateLookupModal
+        isOpen={isPlateModalOpen}
+        onClose={() => setIsPlateModalOpen(false)}
+        onSelectVehicle={handlePlateVehicleSelect}
       />
     </div>
   );
