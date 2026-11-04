@@ -26,6 +26,7 @@ import { Button } from '../components/common/Button';
 import { ReservationOrder } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { openWhatsAppShare } from '../utils/whatsapp';
+import { JobCardEstimatorModal } from '../components/mechanic/JobCardEstimatorModal';
 
 export const ReservationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -63,6 +64,7 @@ export const ReservationPage: React.FC = () => {
   // Flow State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<ReservationOrder | null>(null);
+  const [isJobCardOpen, setIsJobCardOpen] = useState(false);
 
   // Error validation
   const [errors, setErrors] = useState<{
@@ -699,6 +701,15 @@ export const ReservationPage: React.FC = () => {
                   <span>Send Digital Hold Slip via WhatsApp</span>
                 </button>
 
+                <button
+                  type="button"
+                  onClick={() => setIsJobCardOpen(true)}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-purple-600/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] cursor-pointer"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Create Customer Job Card & Estimate</span>
+                </button>
+
                 <Button
                   variant="primary"
                   size="lg"
@@ -716,6 +727,17 @@ export const ReservationPage: React.FC = () => {
         )}
 
       </div>
+
+      {confirmedOrder && (
+        <JobCardEstimatorModal
+          isOpen={isJobCardOpen}
+          onClose={() => setIsJobCardOpen(false)}
+          initialVehicle={confirmedOrder.vehicle}
+          initialPartName={confirmedOrder.partName}
+          initialPartNumber={confirmedOrder.partNumber}
+          initialPartPrice={confirmedOrder.pricePerUnit}
+        />
+      )}
     </div>
   );
 };

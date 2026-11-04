@@ -16,12 +16,14 @@ import {
   Camera,
   Send,
   Car,
-  QrCode
+  QrCode,
+  FileText
 } from 'lucide-react';
 import { AIPartIdentifierModal } from './AIPartIdentifierModal';
 import { InstantPartRequestModal } from './InstantPartRequestModal';
 import { NumberPlateLookupModal } from '../common/NumberPlateLookupModal';
 import { PartAuthenticityScannerModal } from '../common/PartAuthenticityScannerModal';
+import { JobCardEstimatorModal } from './JobCardEstimatorModal';
 import { VehicleRCDetails } from '../../utils/rcLookup';
 import { PartVerificationResult } from '../../utils/authenticityScanner';
 
@@ -41,6 +43,7 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
   const [isInstantRequestOpen, setIsInstantRequestOpen] = useState(false);
   const [isPlateModalOpen, setIsPlateModalOpen] = useState(false);
   const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
+  const [isJobCardModalOpen, setIsJobCardModalOpen] = useState(false);
 
   const handlePlateSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -253,6 +256,22 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
                 Holo
               </span>
             </button>
+
+            <button
+              onClick={() => {
+                setIsJobCardModalOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-purple-300 hover:text-white bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <FileText className="w-3.5 h-3.5 text-purple-400 group-hover:scale-110 transition-transform" />
+                <span>Digital Job Card</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold uppercase">
+                Estimate
+              </span>
+            </button>
           </div>
         </div>
 
@@ -300,6 +319,12 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
         isOpen={isAuthenticityModalOpen}
         onClose={() => setIsAuthenticityModalOpen(false)}
         onApplyPart={handleAuthenticityApply}
+      />
+
+      {/* Workshop Digital Job Card & Customer Cost Estimator Modal */}
+      <JobCardEstimatorModal
+        isOpen={isJobCardModalOpen}
+        onClose={() => setIsJobCardModalOpen(false)}
       />
     </>
   );

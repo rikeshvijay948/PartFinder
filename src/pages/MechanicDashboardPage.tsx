@@ -20,13 +20,15 @@ import {
   Sparkles,
   Camera,
   Send,
-  QrCode
+  QrCode,
+  FileText
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { AIPartIdentifierModal } from '../components/mechanic/AIPartIdentifierModal';
 import { InstantPartRequestModal } from '../components/mechanic/InstantPartRequestModal';
 import { NumberPlateLookupModal } from '../components/common/NumberPlateLookupModal';
 import { PartAuthenticityScannerModal } from '../components/common/PartAuthenticityScannerModal';
+import { JobCardEstimatorModal } from '../components/mechanic/JobCardEstimatorModal';
 import { VehicleRCDetails } from '../utils/rcLookup';
 import { PartVerificationResult } from '../utils/authenticityScanner';
 
@@ -39,6 +41,7 @@ export const MechanicDashboardPage: React.FC = () => {
   const [isInstantRequestOpen, setIsInstantRequestOpen] = useState(false);
   const [isPlateLookupOpen, setIsPlateLookupOpen] = useState(false);
   const [isAuthenticityScannerOpen, setIsAuthenticityScannerOpen] = useState(false);
+  const [isJobCardOpen, setIsJobCardOpen] = useState(false);
 
   const handlePlateVehicleSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -289,7 +292,16 @@ export const MechanicDashboardPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="relative z-10 shrink-0 flex items-center gap-3">
+            <div className="relative z-10 shrink-0 flex flex-wrap items-center gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-xs sm:text-sm font-bold border-brand-500/30 text-brand-300 hover:bg-brand-500/10 hover:text-white"
+                icon={<FileText className="w-4 h-4" />}
+                onClick={() => setIsJobCardOpen(true)}
+              >
+                New Job Card & Estimate
+              </Button>
               <Button
                 variant="primary"
                 size="lg"
@@ -743,6 +755,12 @@ export const MechanicDashboardPage: React.FC = () => {
         isOpen={isAuthenticityScannerOpen}
         onClose={() => setIsAuthenticityScannerOpen(false)}
         onApplyPart={handleAuthenticityApply}
+      />
+
+      {/* Workshop Digital Job Card & Customer Cost Estimator Modal */}
+      <JobCardEstimatorModal
+        isOpen={isJobCardOpen}
+        onClose={() => setIsJobCardOpen(false)}
       />
     </div>
   );
