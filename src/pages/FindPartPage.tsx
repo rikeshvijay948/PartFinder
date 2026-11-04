@@ -16,12 +16,15 @@ import {
   ArrowRight,
   Crosshair,
   CheckCircle2,
-  Mic
+  Mic,
+  QrCode
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { VoiceSearchModal } from '../components/common/VoiceSearchModal';
 import { NumberPlateLookupModal } from '../components/common/NumberPlateLookupModal';
+import { PartAuthenticityScannerModal } from '../components/common/PartAuthenticityScannerModal';
 import { VehicleRCDetails } from '../utils/rcLookup';
+import { PartVerificationResult } from '../utils/authenticityScanner';
 import { 
   POPULAR_MAKES, 
   MODELS_BY_MAKE, 
@@ -63,7 +66,18 @@ export const FindPartPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isPlateModalOpen, setIsPlateModalOpen] = useState(false);
+  const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
   const [activePlateNumber, setActivePlateNumber] = useState<string | null>(searchParams.get('plate') || null);
+
+  // Handle OEM Part Authenticity Scanner Result
+  const handleAuthenticityApply = (result: PartVerificationResult) => {
+    if (result.partName) setPartName(result.partName);
+    if (result.partNumber) setPartNumber(result.partNumber);
+    if (result.compatibleMake) setMake(result.compatibleMake);
+    if (result.compatibleModel) setModel(result.compatibleModel);
+    if (errors.partName) setErrors(prev => ({ ...prev, partName: undefined }));
+    if (errors.model) setErrors(prev => ({ ...prev, model: undefined }));
+  };
 
   // Handle Number Plate RC Selection
   const handlePlateVehicleSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
@@ -466,14 +480,25 @@ export const FindPartPage: React.FC = () => {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setIsVoiceModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 text-xs font-semibold transition-all hover:scale-105 cursor-pointer shadow-sm"
-                >
-                  <Mic className="w-3.5 h-3.5 text-brand-400 animate-pulse" />
-                  <span>Hands-Free Voice Search</span>
-                </button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setIsAuthenticityModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition-all hover:scale-105 cursor-pointer shadow-sm"
+                  >
+                    <QrCode className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Scan Box QR / Barcode</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsVoiceModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 text-xs font-semibold transition-all hover:scale-105 cursor-pointer shadow-sm"
+                  >
+                    <Mic className="w-3.5 h-3.5 text-brand-400 animate-pulse" />
+                    <span>Hands-Free Voice Search</span>
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
@@ -770,6 +795,13 @@ export const FindPartPage: React.FC = () => {
         isOpen={isPlateModalOpen}
         onClose={() => setIsPlateModalOpen(false)}
         onSelectVehicle={handlePlateVehicleSelect}
+      />
+
+      {/* OEM Part Authenticity Scanner Modal */}
+      <PartAuthenticityScannerModal
+        isOpen={isAuthenticityModalOpen}
+        onClose={() => setIsAuthenticityModalOpen(false)}
+        onApplyPart={handleAuthenticityApply}
       />
     </div>
   );

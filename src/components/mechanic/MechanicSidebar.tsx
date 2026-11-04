@@ -15,12 +15,15 @@ import {
   Sparkles,
   Camera,
   Send,
-  Car
+  Car,
+  QrCode
 } from 'lucide-react';
 import { AIPartIdentifierModal } from './AIPartIdentifierModal';
 import { InstantPartRequestModal } from './InstantPartRequestModal';
 import { NumberPlateLookupModal } from '../common/NumberPlateLookupModal';
+import { PartAuthenticityScannerModal } from '../common/PartAuthenticityScannerModal';
 import { VehicleRCDetails } from '../../utils/rcLookup';
+import { PartVerificationResult } from '../../utils/authenticityScanner';
 
 interface MechanicSidebarProps {
   isOpenMobile: boolean;
@@ -37,6 +40,7 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
   const [isAiIdentifierOpen, setIsAiIdentifierOpen] = useState(false);
   const [isInstantRequestOpen, setIsInstantRequestOpen] = useState(false);
   const [isPlateModalOpen, setIsPlateModalOpen] = useState(false);
+  const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
 
   const handlePlateSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -45,6 +49,17 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
       year: rc.year,
       plate: rc.plateNumber,
       ...(selectedPart ? { part: selectedPart } : {})
+    });
+    navigate(`/find-part?${params.toString()}`);
+    onCloseMobile();
+  };
+
+  const handleAuthenticityApply = (res: PartVerificationResult) => {
+    const params = new URLSearchParams({
+      make: res.compatibleMake || 'Tata',
+      model: res.compatibleModel || 'Ace',
+      part: res.partName,
+      partNumber: res.partNumber,
     });
     navigate(`/find-part?${params.toString()}`);
     onCloseMobile();
@@ -222,6 +237,22 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
                 IND
               </span>
             </button>
+
+            <button
+              onClick={() => {
+                setIsAuthenticityModalOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <QrCode className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span>OEM Part Verifier</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-bold uppercase">
+                Holo
+              </span>
+            </button>
           </div>
         </div>
 
@@ -262,6 +293,13 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
         isOpen={isPlateModalOpen}
         onClose={() => setIsPlateModalOpen(false)}
         onSelectVehicle={handlePlateSelect}
+      />
+
+      {/* OEM Part Authenticity Scanner Modal */}
+      <PartAuthenticityScannerModal
+        isOpen={isAuthenticityModalOpen}
+        onClose={() => setIsAuthenticityModalOpen(false)}
+        onApplyPart={handleAuthenticityApply}
       />
     </>
   );

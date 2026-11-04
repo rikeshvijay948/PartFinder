@@ -19,13 +19,16 @@ import {
   ChevronRight,
   Sparkles,
   Camera,
-  Send
+  Send,
+  QrCode
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { AIPartIdentifierModal } from '../components/mechanic/AIPartIdentifierModal';
 import { InstantPartRequestModal } from '../components/mechanic/InstantPartRequestModal';
 import { NumberPlateLookupModal } from '../components/common/NumberPlateLookupModal';
+import { PartAuthenticityScannerModal } from '../components/common/PartAuthenticityScannerModal';
 import { VehicleRCDetails } from '../utils/rcLookup';
+import { PartVerificationResult } from '../utils/authenticityScanner';
 
 export const MechanicDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -35,6 +38,7 @@ export const MechanicDashboardPage: React.FC = () => {
   const [isAiIdentifierOpen, setIsAiIdentifierOpen] = useState(false);
   const [isInstantRequestOpen, setIsInstantRequestOpen] = useState(false);
   const [isPlateLookupOpen, setIsPlateLookupOpen] = useState(false);
+  const [isAuthenticityScannerOpen, setIsAuthenticityScannerOpen] = useState(false);
 
   const handlePlateVehicleSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -43,6 +47,16 @@ export const MechanicDashboardPage: React.FC = () => {
       year: rc.year,
       plate: rc.plateNumber,
       ...(selectedPart ? { part: selectedPart } : {})
+    });
+    navigate(`/find-part?${params.toString()}`);
+  };
+
+  const handleAuthenticityApply = (res: PartVerificationResult) => {
+    const params = new URLSearchParams({
+      make: res.compatibleMake || 'Tata',
+      model: res.compatibleModel || 'Ace',
+      part: res.partName,
+      partNumber: res.partNumber,
     });
     navigate(`/find-part?${params.toString()}`);
   };
@@ -288,8 +302,8 @@ export const MechanicDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* ================= NEW WORKSHOP TOOLS: AI IDENTIFIER, INSTANT REQUEST & RC LOOKUP ================= */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* ================= NEW WORKSHOP TOOLS: AI IDENTIFIER, INSTANT REQUEST, RC LOOKUP & AUTHENTICITY ================= */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             
             {/* Feature 1: AI Part Identifier Card */}
             <div className="bg-gradient-to-br from-navy-900 via-navy-850 to-navy-900 rounded-3xl p-6 border border-brand-500/30 shadow-2xl relative overflow-hidden group hover:border-brand-500/60 transition-all">
@@ -430,6 +444,54 @@ export const MechanicDashboardPage: React.FC = () => {
                   onClick={() => setIsPlateLookupOpen(true)}
                 >
                   <span>Decode Registration Plate</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Feature 4: OEM Part Authenticity & Barcode Verifier */}
+            <div className="bg-gradient-to-br from-navy-900 via-navy-850 to-navy-900 rounded-3xl p-6 border border-cyan-500/30 shadow-2xl relative overflow-hidden group hover:border-cyan-500/60 transition-all">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-cyan-500/20 transition-all" />
+              
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 p-0.5 shadow-lg shadow-cyan-600/30">
+                    <div className="w-full h-full bg-navy-950 rounded-[14px] flex items-center justify-center">
+                      <QrCode className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform" />
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold uppercase tracking-wider">
+                    <Sparkles className="w-3 h-3 text-cyan-400" />
+                    <span>ACMA Hologram Seal</span>
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    OEM Part Authenticity
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Scan packaging barcode or QR to verify genuine hologram, official MRP & warranty.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-navy-950/80 border border-slate-800 text-[11px] text-slate-300 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">Box Barcode Scan:</span>
+                    <span className="font-bold text-cyan-400">99.4% Verified</span>
+                  </div>
+                  <div className="font-semibold text-white truncate">
+                    8901234567890 • Tata Motors Genuine
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full text-xs font-bold shadow-lg shadow-cyan-600/20 bg-cyan-600 hover:bg-cyan-500 border-cyan-500 text-white font-bold flex items-center justify-center gap-2 py-3"
+                  icon={<QrCode className="w-4 h-4 text-white" />}
+                  onClick={() => setIsAuthenticityScannerOpen(true)}
+                >
+                  <span>Verify Part Hologram</span>
                 </Button>
               </div>
             </div>
@@ -674,6 +736,13 @@ export const MechanicDashboardPage: React.FC = () => {
         isOpen={isPlateLookupOpen}
         onClose={() => setIsPlateLookupOpen(false)}
         onSelectVehicle={handlePlateVehicleSelect}
+      />
+
+      {/* OEM Part Authenticity Scanner Modal */}
+      <PartAuthenticityScannerModal
+        isOpen={isAuthenticityScannerOpen}
+        onClose={() => setIsAuthenticityScannerOpen(false)}
+        onApplyPart={handleAuthenticityApply}
       />
     </div>
   );
