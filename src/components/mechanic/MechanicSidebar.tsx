@@ -17,13 +17,15 @@ import {
   Send,
   Car,
   QrCode,
-  FileText
+  FileText,
+  History
 } from 'lucide-react';
 import { AIPartIdentifierModal } from './AIPartIdentifierModal';
 import { InstantPartRequestModal } from './InstantPartRequestModal';
 import { NumberPlateLookupModal } from '../common/NumberPlateLookupModal';
 import { PartAuthenticityScannerModal } from '../common/PartAuthenticityScannerModal';
 import { JobCardEstimatorModal } from './JobCardEstimatorModal';
+import { VehicleServiceLogbookModal } from './VehicleServiceLogbookModal';
 import { VehicleRCDetails } from '../../utils/rcLookup';
 import { PartVerificationResult } from '../../utils/authenticityScanner';
 
@@ -44,6 +46,7 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
   const [isPlateModalOpen, setIsPlateModalOpen] = useState(false);
   const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
   const [isJobCardModalOpen, setIsJobCardModalOpen] = useState(false);
+  const [isServiceLogbookOpen, setIsServiceLogbookOpen] = useState(false);
 
   const handlePlateSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -272,6 +275,22 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
                 Estimate
               </span>
             </button>
+
+            <button
+              onClick={() => {
+                setIsServiceLogbookOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-amber-300 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <History className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+                <span>Service Logbook</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold uppercase">
+                History
+              </span>
+            </button>
           </div>
         </div>
 
@@ -325,6 +344,12 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
       <JobCardEstimatorModal
         isOpen={isJobCardModalOpen}
         onClose={() => setIsJobCardModalOpen(false)}
+      />
+
+      {/* Vehicle Maintenance Logbook & Service History Modal */}
+      <VehicleServiceLogbookModal
+        isOpen={isServiceLogbookOpen}
+        onClose={() => setIsServiceLogbookOpen(false)}
       />
     </>
   );

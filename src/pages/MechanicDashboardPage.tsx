@@ -21,7 +21,8 @@ import {
   Camera,
   Send,
   QrCode,
-  FileText
+  FileText,
+  History
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { AIPartIdentifierModal } from '../components/mechanic/AIPartIdentifierModal';
@@ -29,6 +30,7 @@ import { InstantPartRequestModal } from '../components/mechanic/InstantPartReque
 import { NumberPlateLookupModal } from '../components/common/NumberPlateLookupModal';
 import { PartAuthenticityScannerModal } from '../components/common/PartAuthenticityScannerModal';
 import { JobCardEstimatorModal } from '../components/mechanic/JobCardEstimatorModal';
+import { VehicleServiceLogbookModal } from '../components/mechanic/VehicleServiceLogbookModal';
 import { VehicleRCDetails } from '../utils/rcLookup';
 import { PartVerificationResult } from '../utils/authenticityScanner';
 
@@ -42,6 +44,7 @@ export const MechanicDashboardPage: React.FC = () => {
   const [isPlateLookupOpen, setIsPlateLookupOpen] = useState(false);
   const [isAuthenticityScannerOpen, setIsAuthenticityScannerOpen] = useState(false);
   const [isJobCardOpen, setIsJobCardOpen] = useState(false);
+  const [isServiceLogbookOpen, setIsServiceLogbookOpen] = useState(false);
 
   const handlePlateVehicleSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -293,6 +296,15 @@ export const MechanicDashboardPage: React.FC = () => {
             </div>
 
             <div className="relative z-10 shrink-0 flex flex-wrap items-center gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-xs sm:text-sm font-bold border-amber-500/30 text-amber-300 hover:bg-amber-500/10 hover:text-white"
+                icon={<History className="w-4 h-4" />}
+                onClick={() => setIsServiceLogbookOpen(true)}
+              >
+                Service Logbook
+              </Button>
               <Button
                 variant="outline"
                 size="lg"
@@ -761,6 +773,12 @@ export const MechanicDashboardPage: React.FC = () => {
       <JobCardEstimatorModal
         isOpen={isJobCardOpen}
         onClose={() => setIsJobCardOpen(false)}
+      />
+
+      {/* Vehicle Maintenance Logbook & Service History Modal */}
+      <VehicleServiceLogbookModal
+        isOpen={isServiceLogbookOpen}
+        onClose={() => setIsServiceLogbookOpen(false)}
       />
     </div>
   );
