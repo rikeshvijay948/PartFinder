@@ -22,7 +22,9 @@ import {
   Send,
   QrCode,
   FileText,
-  History
+  History,
+  ShieldAlert,
+  BadgeCheck
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { AIPartIdentifierModal } from '../components/mechanic/AIPartIdentifierModal';
@@ -31,6 +33,8 @@ import { NumberPlateLookupModal } from '../components/common/NumberPlateLookupMo
 import { PartAuthenticityScannerModal } from '../components/common/PartAuthenticityScannerModal';
 import { JobCardEstimatorModal } from '../components/mechanic/JobCardEstimatorModal';
 import { VehicleServiceLogbookModal } from '../components/mechanic/VehicleServiceLogbookModal';
+import { EmergencyBreakdownModal } from '../components/mechanic/EmergencyBreakdownModal';
+import { WarrantyClaimModal } from '../components/mechanic/WarrantyClaimModal';
 import { VehicleRCDetails } from '../utils/rcLookup';
 import { PartVerificationResult } from '../utils/authenticityScanner';
 
@@ -45,6 +49,8 @@ export const MechanicDashboardPage: React.FC = () => {
   const [isAuthenticityScannerOpen, setIsAuthenticityScannerOpen] = useState(false);
   const [isJobCardOpen, setIsJobCardOpen] = useState(false);
   const [isServiceLogbookOpen, setIsServiceLogbookOpen] = useState(false);
+  const [isEmergencySOSOpen, setIsEmergencySOSOpen] = useState(false);
+  const [isWarrantyClaimOpen, setIsWarrantyClaimOpen] = useState(false);
 
   const handlePlateVehicleSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -296,6 +302,24 @@ export const MechanicDashboardPage: React.FC = () => {
             </div>
 
             <div className="relative z-10 shrink-0 flex flex-wrap items-center gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-xs sm:text-sm font-bold border-red-500/40 text-red-300 hover:bg-red-500/10 hover:text-white"
+                icon={<ShieldAlert className="w-4 h-4 text-red-400" />}
+                onClick={() => setIsEmergencySOSOpen(true)}
+              >
+                Highway SOS
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-xs sm:text-sm font-bold border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 hover:text-white"
+                icon={<BadgeCheck className="w-4 h-4 text-cyan-400" />}
+                onClick={() => setIsWarrantyClaimOpen(true)}
+              >
+                Warranty & RMA
+              </Button>
               <Button
                 variant="outline"
                 size="lg"
@@ -779,6 +803,18 @@ export const MechanicDashboardPage: React.FC = () => {
       <VehicleServiceLogbookModal
         isOpen={isServiceLogbookOpen}
         onClose={() => setIsServiceLogbookOpen(false)}
+      />
+
+      {/* Highway Breakdown SOS Modal */}
+      <EmergencyBreakdownModal
+        isOpen={isEmergencySOSOpen}
+        onClose={() => setIsEmergencySOSOpen(false)}
+      />
+
+      {/* Spare Parts Warranty & RMA Center Modal */}
+      <WarrantyClaimModal
+        isOpen={isWarrantyClaimOpen}
+        onClose={() => setIsWarrantyClaimOpen(false)}
       />
     </div>
   );

@@ -18,7 +18,9 @@ import {
   Car,
   QrCode,
   FileText,
-  History
+  History,
+  ShieldAlert,
+  BadgeCheck
 } from 'lucide-react';
 import { AIPartIdentifierModal } from './AIPartIdentifierModal';
 import { InstantPartRequestModal } from './InstantPartRequestModal';
@@ -26,6 +28,8 @@ import { NumberPlateLookupModal } from '../common/NumberPlateLookupModal';
 import { PartAuthenticityScannerModal } from '../common/PartAuthenticityScannerModal';
 import { JobCardEstimatorModal } from './JobCardEstimatorModal';
 import { VehicleServiceLogbookModal } from './VehicleServiceLogbookModal';
+import { EmergencyBreakdownModal } from './EmergencyBreakdownModal';
+import { WarrantyClaimModal } from './WarrantyClaimModal';
 import { VehicleRCDetails } from '../../utils/rcLookup';
 import { PartVerificationResult } from '../../utils/authenticityScanner';
 
@@ -47,6 +51,8 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
   const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
   const [isJobCardModalOpen, setIsJobCardModalOpen] = useState(false);
   const [isServiceLogbookOpen, setIsServiceLogbookOpen] = useState(false);
+  const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
+  const [isWarrantyModalOpen, setIsWarrantyModalOpen] = useState(false);
 
   const handlePlateSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -291,6 +297,38 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
                 History
               </span>
             </button>
+
+            <button
+              onClick={() => {
+                setIsEmergencyModalOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-red-300 hover:text-white bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <ShieldAlert className="w-3.5 h-3.5 text-red-400 group-hover:scale-110 transition-transform" />
+                <span>Highway Breakdown SOS</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 font-bold uppercase">
+                24x7
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                setIsWarrantyModalOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <BadgeCheck className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span>Warranty & RMA Claims</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-bold uppercase">
+                RMA
+              </span>
+            </button>
           </div>
         </div>
 
@@ -350,6 +388,18 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
       <VehicleServiceLogbookModal
         isOpen={isServiceLogbookOpen}
         onClose={() => setIsServiceLogbookOpen(false)}
+      />
+
+      {/* Highway Breakdown SOS Modal */}
+      <EmergencyBreakdownModal
+        isOpen={isEmergencyModalOpen}
+        onClose={() => setIsEmergencyModalOpen(false)}
+      />
+
+      {/* Spare Parts Warranty & RMA Center Modal */}
+      <WarrantyClaimModal
+        isOpen={isWarrantyModalOpen}
+        onClose={() => setIsWarrantyModalOpen(false)}
       />
     </>
   );
