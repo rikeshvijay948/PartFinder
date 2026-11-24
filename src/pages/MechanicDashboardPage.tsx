@@ -24,7 +24,9 @@ import {
   FileText,
   History,
   ShieldAlert,
-  BadgeCheck
+  BadgeCheck,
+  Layers,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { AIPartIdentifierModal } from '../components/mechanic/AIPartIdentifierModal';
@@ -35,6 +37,8 @@ import { JobCardEstimatorModal } from '../components/mechanic/JobCardEstimatorMo
 import { VehicleServiceLogbookModal } from '../components/mechanic/VehicleServiceLogbookModal';
 import { EmergencyBreakdownModal } from '../components/mechanic/EmergencyBreakdownModal';
 import { WarrantyClaimModal } from '../components/mechanic/WarrantyClaimModal';
+import { WorkshopBayTrackerModal } from '../components/mechanic/WorkshopBayTrackerModal';
+import { GarageKhataLedgerModal } from '../components/mechanic/GarageKhataLedgerModal';
 import { VehicleRCDetails } from '../utils/rcLookup';
 import { PartVerificationResult } from '../utils/authenticityScanner';
 
@@ -51,6 +55,8 @@ export const MechanicDashboardPage: React.FC = () => {
   const [isServiceLogbookOpen, setIsServiceLogbookOpen] = useState(false);
   const [isEmergencySOSOpen, setIsEmergencySOSOpen] = useState(false);
   const [isWarrantyClaimOpen, setIsWarrantyClaimOpen] = useState(false);
+  const [isBayTrackerOpen, setIsBayTrackerOpen] = useState(false);
+  const [isKhataLedgerOpen, setIsKhataLedgerOpen] = useState(false);
 
   const handlePlateVehicleSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -328,6 +334,24 @@ export const MechanicDashboardPage: React.FC = () => {
                 onClick={() => setIsServiceLogbookOpen(true)}
               >
                 Service Logbook
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-xs sm:text-sm font-bold border-brand-500/30 text-brand-300 hover:bg-brand-500/10 hover:text-white"
+                icon={<Layers className="w-4 h-4 text-brand-400" />}
+                onClick={() => setIsBayTrackerOpen(true)}
+              >
+                Bay Queue
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-xs sm:text-sm font-bold border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10 hover:text-white"
+                icon={<BookOpen className="w-4 h-4 text-emerald-400" />}
+                onClick={() => setIsKhataLedgerOpen(true)}
+              >
+                Counter Khata
               </Button>
               <Button
                 variant="outline"
@@ -815,6 +839,18 @@ export const MechanicDashboardPage: React.FC = () => {
       <WarrantyClaimModal
         isOpen={isWarrantyClaimOpen}
         onClose={() => setIsWarrantyClaimOpen(false)}
+      />
+
+      {/* Workshop Bay Queue & Progress Tracker Modal */}
+      <WorkshopBayTrackerModal
+        isOpen={isBayTrackerOpen}
+        onClose={() => setIsBayTrackerOpen(false)}
+      />
+
+      {/* Garage Counter Khata & Credit Ledger Modal */}
+      <GarageKhataLedgerModal
+        isOpen={isKhataLedgerOpen}
+        onClose={() => setIsKhataLedgerOpen(false)}
       />
     </div>
   );

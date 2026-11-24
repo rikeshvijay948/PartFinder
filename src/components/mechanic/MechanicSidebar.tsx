@@ -20,7 +20,9 @@ import {
   FileText,
   History,
   ShieldAlert,
-  BadgeCheck
+  BadgeCheck,
+  Layers,
+  BookOpen
 } from 'lucide-react';
 import { AIPartIdentifierModal } from './AIPartIdentifierModal';
 import { InstantPartRequestModal } from './InstantPartRequestModal';
@@ -30,6 +32,8 @@ import { JobCardEstimatorModal } from './JobCardEstimatorModal';
 import { VehicleServiceLogbookModal } from './VehicleServiceLogbookModal';
 import { EmergencyBreakdownModal } from './EmergencyBreakdownModal';
 import { WarrantyClaimModal } from './WarrantyClaimModal';
+import { WorkshopBayTrackerModal } from './WorkshopBayTrackerModal';
+import { GarageKhataLedgerModal } from './GarageKhataLedgerModal';
 import { VehicleRCDetails } from '../../utils/rcLookup';
 import { PartVerificationResult } from '../../utils/authenticityScanner';
 
@@ -53,6 +57,8 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
   const [isServiceLogbookOpen, setIsServiceLogbookOpen] = useState(false);
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
   const [isWarrantyModalOpen, setIsWarrantyModalOpen] = useState(false);
+  const [isBayModalOpen, setIsBayModalOpen] = useState(false);
+  const [isKhataModalOpen, setIsKhataModalOpen] = useState(false);
 
   const handlePlateSelect = (rc: VehicleRCDetails, selectedPart?: string) => {
     const params = new URLSearchParams({
@@ -329,6 +335,38 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
                 RMA
               </span>
             </button>
+
+            <button
+              onClick={() => {
+                setIsBayModalOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-brand-300 hover:text-white bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <Layers className="w-3.5 h-3.5 text-brand-400 group-hover:scale-110 transition-transform" />
+                <span>Bay Queue Tracker</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-brand-500/20 text-brand-300 font-bold uppercase">
+                Bays
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                setIsKhataModalOpen(true);
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-emerald-300 hover:text-white bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <BookOpen className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span>Garage Counter Khata</span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold uppercase">
+                Khata
+              </span>
+            </button>
           </div>
         </div>
 
@@ -400,6 +438,18 @@ export const MechanicSidebar: React.FC<MechanicSidebarProps> = ({
       <WarrantyClaimModal
         isOpen={isWarrantyModalOpen}
         onClose={() => setIsWarrantyModalOpen(false)}
+      />
+
+      {/* Workshop Bay Queue & Progress Tracker Modal */}
+      <WorkshopBayTrackerModal
+        isOpen={isBayModalOpen}
+        onClose={() => setIsBayModalOpen(false)}
+      />
+
+      {/* Garage Counter Khata & Credit Ledger Modal */}
+      <GarageKhataLedgerModal
+        isOpen={isKhataModalOpen}
+        onClose={() => setIsKhataModalOpen(false)}
       />
     </>
   );
